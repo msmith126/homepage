@@ -85,6 +85,7 @@
         aspect-ratio: 1;
         border-radius: 50%;
         object-fit: cover;
+        object-position: center 10%;
         border: 6px solid var(--ring);
         box-shadow:
           var(--shadow),
@@ -108,6 +109,25 @@
         line-height: 1.5;
         color: var(--muted);
       }
+
+      .hero__links {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .hero__links a {
+        color: var(--text);
+        font-weight: 500;
+        text-decoration: underline;
+        text-decoration-color: var(--accent);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+      }
+
+      .hero__links a:hover {
+        color: var(--accent);
+      }
     </style>
   </head>
   <body>
@@ -117,7 +137,7 @@
         <!-- Swap src for your real photo, e.g. src="images/madison.jpg" -->
         <img
           class="hero__photo"
-          src="https://placehold.co/400x400/e8a598/ffffff?text=MS&font=playfair-display"
+          src="madison.jpg"
           alt="Portrait of Madison Smith"
         />
         <div class="hero__text">
@@ -125,6 +145,21 @@
           <p class="hero__tagline">
             Astrophysicist - Data Scientist - Not an artist
           </p>
+          <nav class="hero__links">
+            <!-- Replace each href with your profile URL -->
+            <a
+              href="https://scholar.google.com/citations?user=BAizl1kAAAAJ&hl=en"
+              target="_blank"
+              rel="noopener"
+              >Google Scholar</a
+            >
+            <a
+              href="https://letterboxd.com/madisonsmith126/"
+              target="_blank"
+              rel="noopener"
+              >Letterboxd</a
+            >
+          </nav>
         </div>
       </section>
     </main>
