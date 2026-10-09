@@ -1,95 +1,187 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Madison Smith</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #faf7f2;
-      --text: #1f1d1a;
-      --muted: #6b665e;
-      --accent: #e8a598;
-      --ring: #ffffff;
-      --shadow: 0 12px 32px rgba(31, 29, 26, 0.12);
-    }
-
-    @media (prefers-color-scheme: dark) {
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Madison Smith</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
       :root {
-        --bg: #17161a;
-        --text: #f3efe8;
-        --muted: #a39d93;
-        --accent: #d98c7e;
-        --ring: #26242a;
-        --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        --bg: #faf7f2;
+        --text: #1f1d1a;
+        --muted: #6b665e;
+        --accent: #e8a598;
+        --ring: #ffffff;
+        --shadow: 0 12px 32px rgba(31, 29, 26, 0.12);
+        --star: #8a8fa8;
       }
-    }
 
-    *, *::before, *::after { box-sizing: border-box; }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #17161a;
+          --text: #f3efe8;
+          --muted: #a39d93;
+          --accent: #d98c7e;
+          --ring: #26242a;
+          --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+          --star: #ffffff;
+        }
+      }
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Inter", system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-    .hero {
-      min-height: 100vh;
-      min-height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      padding: 2rem 1rem;
-      text-align: center;
-    }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
 
-    .hero__photo {
-      width: clamp(140px, 30vw, 200px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 6px solid var(--ring);
-      box-shadow: var(--shadow), 0 0 0 2px var(--accent);
-      background: var(--accent);
-    }
+      /* Star field sits behind everything, fills the window */
+      .stars {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
 
-    .hero__name {
-      margin: 0;
-      font-family: "Fraunces", Georgia, serif;
-      font-weight: 600;
-      font-size: clamp(2.5rem, 7vw, 4.5rem);
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-    }
+      main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+      }
 
-    .hero__tagline {
-      margin: 0;
-      max-width: 36ch;
-      font-size: clamp(1rem, 2.2vw, 1.25rem);
-      line-height: 1.5;
-      color: var(--muted);
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <section class="hero">
-      <!-- Swap src for your real photo, e.g. src="images/madison.jpg" -->
-      <img
-        class="hero__photo"
-        src="https://placehold.co/400x400/e8a598/ffffff?text=MS&font=playfair-display"
-        alt="Portrait of Madison Smith"
-      >
-      <h1 class="hero__name">Madison Smith</h1>
-      <p class="hero__tagline">Your tagline goes here — a short line about what you do.</p>
-    </section>
-  </main>
-</body>
+      .hero {
+        background: var(--bg); /* opaque, so stars don't show through */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid black;
+        gap: 2.5rem;
+        padding: 3rem 4rem;
+      }
+
+      .hero__text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .hero__photo {
+        width: 200px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 6px solid var(--ring);
+        box-shadow:
+          var(--shadow),
+          0 0 0 2px var(--accent);
+        background: var(--accent);
+      }
+
+      .hero__name {
+        margin: 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 600;
+        font-size: 4.5rem;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+
+      .hero__tagline {
+        margin: 0;
+        max-width: 36ch;
+        font-size: 1.25rem;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas class="stars" aria-hidden="true"></canvas>
+    <main>
+      <section class="hero">
+        <!-- Swap src for your real photo, e.g. src="images/madison.jpg" -->
+        <img
+          class="hero__photo"
+          src="https://placehold.co/400x400/e8a598/ffffff?text=MS&font=playfair-display"
+          alt="Portrait of Madison Smith"
+        />
+        <div class="hero__text">
+          <h1 class="hero__name">Madison Smith</h1>
+          <p class="hero__tagline">
+            Astrophysicist - Data Scientist - Not an artist
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const canvas = document.querySelector(".stars");
+      const ctx = canvas.getContext("2d");
+      const starColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--star")
+        .trim();
+      let stars = [];
+
+      function makeStars() {
+        // Match the canvas to the window, sharp on retina screens
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = innerWidth * dpr;
+        canvas.height = innerHeight * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = Math.round((innerWidth * innerHeight) / 5000);
+        stars = Array.from({ length: count }, () => {
+          const r = 0.5 + Math.random() * 2; // radius: 0.5–2.5px
+          return {
+            x: Math.random() * innerWidth,
+            y: Math.random() * innerHeight,
+            r,
+            speed: 12 / r, // bigger = slower (px per second)
+            alpha: 0.3 + Math.random() * 0.5,
+          };
+        });
+      }
+
+      let last = performance.now();
+      function frame(now) {
+        const dt = Math.min((now - last) / 1000, 0.1); // seconds since last frame
+        last = now;
+
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        ctx.fillStyle = starColor;
+        for (const s of stars) {
+          s.x += s.speed * dt;
+          // Drifted off the right edge: re-enter on the left at a new height
+          if (s.x - s.r > innerWidth) {
+            s.x = -s.r;
+            s.y = Math.random() * innerHeight;
+          }
+          ctx.globalAlpha = s.alpha;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        requestAnimationFrame(frame);
+      }
+
+      makeStars();
+      window.addEventListener("resize", makeStars);
+      requestAnimationFrame(frame);
+    </script>
+  </body>
 </html>
