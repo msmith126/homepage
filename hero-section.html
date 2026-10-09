@@ -4,33 +4,58 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Madison Smith</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
     <style>
+      /* Registering the colors lets the browser fade smoothly between
+         space and day values, instead of snapping. */
+      @property --bg {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #0b0c16;
+      }
+      @property --text {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #f3efe8;
+      }
+      @property --muted {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #a39d93;
+      }
+      @property --accent {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #d98c7e;
+      }
+      @property --ring {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #26242a;
+      }
+
+      /* Space mode (the default) */
       :root {
-        --bg: #faf7f2;
+        --bg: #0b0c16;
+        --text: #f3efe8;
+        --muted: #a39d93;
+        --accent: #d98c7e;
+        --ring: #26242a;
+        --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        --star: #ffffff;
+        /* Going back to space: colors darken right away as the star recedes */
+        transition-property: --bg, --text, --muted, --accent, --ring;
+        transition-duration: 2s;
+      }
+
+      /* Day mode: added by the button */
+      :root.day {
+        --bg: #fdf3e1;
         --text: #1f1d1a;
         --muted: #6b665e;
         --accent: #e8a598;
         --ring: #ffffff;
-        --shadow: 0 12px 32px rgba(31, 29, 26, 0.12);
-        --star: #8a8fa8;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #17161a;
-          --text: #f3efe8;
-          --muted: #a39d93;
-          --accent: #d98c7e;
-          --ring: #26242a;
-          --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-          --star: #ffffff;
-        }
+        /* Wait for the star to get close, then brighten */
+        transition-delay: 1.2s;
       }
 
       *,
@@ -54,6 +79,57 @@
         width: 100%;
         height: 100%;
         z-index: 0;
+        transition: opacity 2s;
+      }
+
+      /* Sunlight washes out the background stars */
+      .day .stars {
+        opacity: 0;
+      }
+
+      /* The approaching star: a big glowing gradient, shrunk to a dot
+         in the corner until day mode pulls it in close */
+      .sun {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 160vmax;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          #fffef5 0%,
+          #fff3c4 7%,
+          #ffd27a 14%,
+          rgba(255, 170, 90, 0.45) 28%,
+          rgba(255, 170, 90, 0) 60%
+        );
+        transform: translate(-50%, -50%) translate(38vw, -38vh) scale(0.015);
+        pointer-events: none;
+        z-index: 0;
+        /* Leaving: drifts back out, slowing as it goes */
+        transition: transform 2.5s ease-out;
+      }
+
+      .day .sun {
+        transform: translate(-50%, -50%) translate(22vw, -28vh) scale(1);
+        /* Arriving: starts slow, then rushes in */
+        transition: transform 3s cubic-bezier(0.7, 0, 0.9, 0.5);
+      }
+
+      .mode-toggle {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 2;
+        padding: 0.5rem 1.1rem;
+        font: inherit;
+        font-weight: 500;
+        color: var(--text);
+        background: var(--bg);
+        border: 1.5px solid var(--text);
+        border-radius: 999px;
+        cursor: pointer;
       }
 
       main {
@@ -132,9 +208,12 @@
   </head>
   <body>
     <canvas class="stars" aria-hidden="true"></canvas>
+    <div class="sun" aria-hidden="true"></div>
+    <button class="mode-toggle" type="button" aria-pressed="false">
+      Day mode
+    </button>
     <main>
       <section class="hero">
-        <!-- Swap src for your real photo, e.g. src="images/madison.jpg" -->
         <img
           class="hero__photo"
           src="madison.jpg"
@@ -146,7 +225,6 @@
             Astrophysicist - Data Scientist - Not an artist
           </p>
           <nav class="hero__links">
-            <!-- Replace each href with your profile URL -->
             <a
               href="https://scholar.google.com/citations?user=BAizl1kAAAAJ&hl=en"
               target="_blank"
@@ -218,6 +296,14 @@
       makeStars();
       window.addEventListener("resize", makeStars);
       requestAnimationFrame(frame);
+
+      // Day/space toggle: CSS does all the animating
+      const toggle = document.querySelector(".mode-toggle");
+      toggle.addEventListener("click", () => {
+        const isDay = document.documentElement.classList.toggle("day");
+        toggle.textContent = isDay ? "Space mode" : "Day mode";
+        toggle.setAttribute("aria-pressed", isDay);
+      });
     </script>
   </body>
 </html>
