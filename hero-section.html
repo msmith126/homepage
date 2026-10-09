@@ -59,7 +59,7 @@
       main {
         position: relative;
         z-index: 1;
-        min-height: 100vh;
+        min-height: 75vh;
         display: grid;
         place-items: center;
       }
@@ -144,6 +144,7 @@
         canvas.height = innerHeight * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+        //change here for more/less stars. lower number gives more stars (obviously)
         const count = Math.round((innerWidth * innerHeight) / 5000);
         stars = Array.from({ length: count }, () => {
           const r = 0.5 + Math.random() * 2; // radius: 0.5–2.5px
