@@ -344,10 +344,11 @@
       const projects = [
         {
           title: "Infectious diseases",
-          description: "Remaking an Economist bar chart on infectious diseases.",
+          description:
+            "Remaking an Economist bar chart on infectious diseases.",
           tags: ["bar chart"],
           folder: "economist-diseases",
-          // thumb: "thumb.png",
+          thumb: "economist-diseases-thumb.png",
         },
       ];
 
@@ -367,7 +368,10 @@
               .attr("src", `projects/${d.folder}/${d.thumb}`)
               .attr("alt", "");
           } else {
-            card.append("div").attr("class", "card__thumb").text("Preview coming soon");
+            card
+              .append("div")
+              .attr("class", "card__thumb")
+              .text("Preview coming soon");
           }
 
           const body = card.append("div").attr("class", "card__body");
