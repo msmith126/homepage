@@ -1,4 +1,6 @@
+import argparse
 import csv
+import gzip
 import json
 import os
 import time
@@ -20,32 +22,13 @@ BASE = "https://api.themoviedb.org/3"
 HORROR = 27
 MAX_PAGES = 500  # TMDB caps discover at 500 pages x 20 results
 FIRST_YEAR = 1890
+APPEND = "credits,keywords,release_dates"
+CAST_LIMIT = 10
+CREW_JOBS = {"Director", "Screenplay", "Writer", "Producer", "Original Music Composer"}
+BATCH_SIZE = 500
 IDS_FILE = HERE / "horror_ids.json"
-OUT = HERE / "horror_movies_tmdb.csv"
-EXISTING = HERE / "horror_movies.csv"
-# TidyTuesday dataset columns
-FIELDS = [
-    "id",
-    "original_title",
-    "title",
-    "original_language",
-    "overview",
-    "tagline",
-    "release_date",
-    "poster_path",
-    "popularity",
-    "vote_count",
-    "vote_average",
-    "budget",
-    "revenue",
-    "runtime",
-    "status",
-    "adult",
-    "backdrop_path",
-    "genre_names",
-    "collection",
-    "collection_name",
-]
+RAW_DIR = HERE / "raw"
+LEGACY = [HERE / "horror_movies.csv", HERE / "horror_movies_tmdb.csv"]
 
 session = requests.Session()
 session.headers["Authorization"] = f"Bearer {TOKEN}"
@@ -99,59 +82,86 @@ def fetch_range(start, end):
     return ids
 
 
-def all_horror_ids():
-    if IDS_FILE.exists():
-        return json.loads(IDS_FILE.read_text())
+def all_horror_ids(refresh=False):
+    if IDS_FILE.exists() and not refresh:
+        return set(json.loads(IDS_FILE.read_text()))
     ids = set()
     for year in range(FIRST_YEAR, date.today().year + 1):
         for start, end in date_ranges(year):
             ids.update(fetch_range(start, end))
         print(f"{year}: {len(ids)} ids so far")
-    ids = sorted(ids)
-    IDS_FILE.write_text(json.dumps(ids))
+    IDS_FILE.write_text(json.dumps(sorted(ids)))
     return ids
 
 
 def details(movie_id):
-    m = get(f"/movie/{movie_id}")
+    m = get(f"/movie/{movie_id}", {"append_to_response": APPEND})
     if m is None:
         return None
-    collection = m.get("belongs_to_collection") or {}
-    return {
-        **m,
-        "genre_names": ", ".join(g["name"] for g in m["genres"]),
-        "collection": collection.get("id"),
-        "collection_name": collection.get("name"),
-    }
+    credits = m.get("credits") or {}
+    credits["cast"] = credits.get("cast", [])[:CAST_LIMIT]
+    credits["crew"] = [c for c in credits.get("crew", []) if c["job"] in CREW_JOBS]
+    return m
 
 
-def ids_in(path):
-    if not path.exists():
-        return set()
-    with path.open(newline="") as f:
-        return {int(row["id"]) for row in csv.DictReader(f)}
+def saved_ids():
+    ids = set()
+    for path in RAW_DIR.glob("*.jsonl.gz"):
+        with gzip.open(path, "rt") as f:
+            ids.update(json.loads(line)["id"] for line in f)
+    return ids
+
+
+def legacy_ids():
+    ids = set()
+    for path in LEGACY:
+        if path.exists():
+            with path.open(newline="") as f:
+                ids.update(int(row["id"]) for row in csv.DictReader(f))
+    return ids
+
+
+def write_batch(movies):
+    RAW_DIR.mkdir(exist_ok=True)
+    n = len(list(RAW_DIR.glob("*.jsonl.gz")))
+    path = RAW_DIR / f"{n + 1:05d}.jsonl.gz"
+    tmp = path.with_suffix(".tmp")
+    with gzip.open(tmp, "wt") as f:
+        for m in movies:
+            f.write(json.dumps(m) + "\n")
+    tmp.rename(path)  # only complete batches ever get the .jsonl.gz name
 
 
 def main():
-    ids = all_horror_ids()
-    done = ids_in(OUT) | ids_in(EXISTING)
-    todo = [i for i in ids if i not in done]
-    print(f"{len(ids)} horror movies, {len(done)} already have, {len(todo)} to go")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--refresh-ids", action="store_true", help="re-scan TMDB for new horror movies")
+    parser.add_argument("--backfill", action="store_true", help="also download movies that are only in the legacy CSVs")
+    args = parser.parse_args()
 
-    is_new = not OUT.exists()
-    with OUT.open("a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
-        if is_new:
-            writer.writeheader()
+    ids = all_horror_ids(refresh=args.refresh_ids)
+    skip = saved_ids()
+    if args.backfill:
+        ids |= legacy_ids()
+    else:
+        skip |= legacy_ids()
+    todo = sorted(ids - skip)
+    print(f"{len(ids)} movies, {len(ids & skip)} skipped, {len(todo)} to download")
+
+    batch = []
+    try:
         for n, movie_id in enumerate(todo, 1):
-            row = details(movie_id)
-            if row:
-                writer.writerow(row)
-            if n % 500 == 0:
-                f.flush()
+            m = details(movie_id)
+            if m:
+                batch.append(m)
+            if len(batch) >= BATCH_SIZE:
+                write_batch(batch)
+                batch = []
                 print(f"{n}/{len(todo)}")
+    finally:
+        if batch:
+            write_batch(batch)
 
-    print(f"Done. Saved to {OUT.name}")
+    print("Done")
 
 
 if __name__ == "__main__":

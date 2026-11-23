@@ -13,3 +13,5 @@ __pycache__
 
 horror_movies.csv
 horror_movies_tmdb.csv
+projects/horror_movies/raw/
+projects/horror_movies/horror_ids.json
