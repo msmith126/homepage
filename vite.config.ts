@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -7,7 +7,8 @@ import react from "@vitejs/plugin-react";
 // so adding a project doesn't require editing this file.
 const projects = readdirSync("projects", { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name);
+  .map((entry) => entry.name)
+  .filter((name) => existsSync(resolve("projects", name, "index.html")));
 
 export default defineConfig({
   // GitHub Pages serves this repo at msmith126.github.io/homepage/
