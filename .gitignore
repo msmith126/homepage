@@ -10,3 +10,6 @@ dist
 # Python
 .venv
 __pycache__
+
+horror_movies.csv
+horror_movies_tmdb.csv
